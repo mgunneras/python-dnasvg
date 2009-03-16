@@ -1,0 +1,24 @@
+
+DRAW_MAX_SNPS = 368667
+GRID_WIDTH = 151 # 3780/25
+SHAPE_SIZE = 25 # 9298800/368667
+CANVAS_VIEWPORT = (3780, 2460) # 9298800
+STROKE = 0
+
+# DRAW_MAX_SNPS = 100
+# GRID_WIDTH = 10
+# SHAPE_SIZE = 1
+# 
+# CANVAS_SIZE = (10, 10)
+# STROKE = 0
+
+
+
+COLOURS = {
+	#		R	G	B
+	'T' : (255, 86, 41),
+	'A' : (255, 169, 44),
+	'G' : (255, 46, 180),
+	'C' : (53, 203, 237),
+	'-' : (20, 20, 20),
+}
