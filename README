@@ -1,10 +1,13 @@
 Draws an SVG representation of the SNPs from a DNA scan at deCODEme
 
+Usage:
+	
+python draw.py /path/to/deCODEme_scan.csv /path/to/output.svg
+
+
+
 Needs svgfig
 http://code.google.com/p/svgfig/
 
 About deCODEme
 http://www.decodeme.com/
-
-by Mattias Gunneras
-http://www.bothernomore.com/

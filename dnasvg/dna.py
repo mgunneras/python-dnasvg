@@ -1,6 +1,7 @@
 import csv
 from svgfig import *
 import config
+from math import sqrt
 
 
 class SNP(object):
@@ -32,8 +33,6 @@ class SNPFactory(object):
 		self.reader.next()
 	
 	def get_SNP(self):
-		if self.reader.line_num > config.DRAW_MAX_SNPS:
-			raise StopIteration
 		data = self.reader.next()
 		return SNP(data[0], data[1], data[4], data[5])
 
@@ -47,8 +46,12 @@ class DNADrawer(object):
 	_current_y = 0	
 	_trigon_point_bottom_left = True
 		
-	def __init__(self, deCODEme_scan_file):
+	def __init__(self, deCODEme_scan_file, limit, offset, width, height):
 		self.snp_factory = SNPFactory(deCODEme_scan_file)
+		self.limit = limit
+		self.offset = offset
+		self.shape_size = sqrt((width*height)/limit)
+		self.grid_width = int(width/self.shape_size)
 	
 	def get_svg(self):
 		return self._render()
@@ -58,18 +61,27 @@ class DNADrawer(object):
 		renders the SVG representation and wraps it in a group.
 		"""
 		self.svg_group = SVG('g')
-		self.shape_count = 0
+		shape_count = 0
 		while True:
 			try:
 				snp = self.snp_factory.get_SNP()
-			except StopIteration:
+			except StopIteration:                                                    
 				break
+			if shape_count < self.offset: 
+				shape_count=shape_count+1
+				continue
 			svg = self.svg_shape(snp)
 			self.svg_group.append(svg)
-
+			self._calculate_new_pos()
+			shape_count=shape_count+1
+			if shape_count==self.limit: break
+			
 		return self.svg_group
 
 	def svg_shape(self, snp):
+		"""
+		Returns the SVG object for given SNP
+		"""
 		# <polygon points="0,0 10,0 0,10" fill="#00FF00"/>
 		# group for the shapes
 		group = SVG('g')
@@ -80,15 +92,13 @@ class DNADrawer(object):
 			colour = snp.colour(index)
 			group.append(SVG("polygon", points=points_string, fill=rgb(colour[0], colour[1], colour[2], 255)))
 
-		self._calculate_new_pos()
-		self.shape_count = self.shape_count + 1
 		return group
 	
 	def trigon_points(self, point_left):
 		tl = (self.x(), self.y())
-		tr = (self.x()+config.SHAPE_SIZE, self.y())
-		bl = (self.x(), self.y()+config.SHAPE_SIZE)
-		br = (self.x()+config.SHAPE_SIZE, self.y()+config.SHAPE_SIZE)
+		tr = (self.x()+self.shape_size, self.y())
+		bl = (self.x(), self.y()+self.shape_size)
+		br = (self.x()+self.shape_size, self.y()+self.shape_size)
 		if point_left:
 			return ([tl, br, bl], [tl, tr, br])
 		else: 
@@ -98,22 +108,19 @@ class DNADrawer(object):
 		self._trigon_point_bottom_left = not self._trigon_point_bottom_left
 		# if new row set the start values
 		if self.x() == 0:
-			if self._current_y % 2:
-				self._trigon_point_bottom_left = True
-			else:
-				self._trigon_point_bottom_left = False
+			self._trigon_point_bottom_left = self._current_y % 2
 		
 		return self._trigon_point_bottom_left
 	
 	def x(self):
-		return self._current_x * config.SHAPE_SIZE
+		return self._current_x * self.shape_size
 	
 	def y(self):
-		return self._current_y * config.SHAPE_SIZE
+		return self._current_y * self.shape_size
 	
 	def _calculate_new_pos(self):
 		# if not full row
-		if self._current_x == config.GRID_WIDTH-1:
+		if self._current_x == self.grid_width-1:
 			# starting place for next shape
 			self._current_x = 0
 			self._current_y = self._current_y + 1
