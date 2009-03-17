@@ -1,7 +1,7 @@
 import csv
 from svgfig import *
 import config
-from math import sqrt
+import math
 
 
 class SNP(object):
@@ -50,9 +50,15 @@ class DNADrawer(object):
 		self.snp_factory = SNPFactory(deCODEme_scan_file)
 		self.limit = limit
 		self.offset = offset
-		self.shape_size = sqrt((width*height)/limit)
+		self.shape_size = math.sqrt((width*height)/limit)
 		self.grid_width = int(width/self.shape_size)
-	
+		self.grid_height = int(math.floor(height/self.shape_size)) 
+		#print self.shape_size
+		#self.limit = self.grid_width*self.grid_height
+		#self.shape_size = math.sqrt((width*height)/self.limit)
+		#print self.shape_size
+
+
 	def get_svg(self):
 		return self._render()
 		
@@ -64,7 +70,10 @@ class DNADrawer(object):
 		shape_count = 0
 		while True:
 			try:
-				snp = self.snp_factory.get_SNP()
+				while True:
+					snp = self.snp_factory.get_SNP()
+					if snp.code!='--':
+						break
 			except StopIteration:                                                    
 				break
 			if shape_count < self.offset: 
@@ -75,7 +84,7 @@ class DNADrawer(object):
 			self._calculate_new_pos()
 			shape_count=shape_count+1
 			if shape_count==self.limit: break
-			
+			if self._current_y==self.grid_height: break
 		return self.svg_group
 
 	def svg_shape(self, snp):
