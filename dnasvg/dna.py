@@ -72,11 +72,11 @@ class DNADrawer(object):
 	_current_y = 0	
 	_trigon_point_bottom_left = True
 		
-	def __init__(self, deCODEme_scan_file, deCODEme_trait_file, limit, offset, width, height):
+	def __init__(self, deCODEme_scan_file, deCODEme_trait_file, count, offset, width, height):
 		self.snp_factory = SNPFactory(deCODEme_scan_file, deCODEme_trait_file)
-		self.limit = limit
+		self.count = count
 		self.offset = offset
-		self.shape_size = math.sqrt((width*height)/limit)
+		self.shape_size = math.sqrt((width*height)/float(count))
 		self.grid_width = int(width/self.shape_size)
 		self.grid_height = int(math.floor(height/self.shape_size)) 
 
@@ -87,10 +87,13 @@ class DNADrawer(object):
 			</filter>
 		"""
 		defs = SVG('defs')
-		for c in range(22):
-			c=c+1
-			filter = SVG('filter', id='F%d' % c, filterUnits="objectBoundingBox", x="0%", y="0%", width="100%", height="100%")
-			filter.append(SVG('feColorMatrix', type="hueRotate", values="%d0" % (int(c)*3)))
+		chromosomes = range(1, 23)
+		chromosomes.extend(['X','Y','M'])
+		filter_value = 0
+		for c in chromosomes:
+			filter = SVG('filter', id='F%s' % c, filterUnits="objectBoundingBox", x="0%", y="0%", width="100%", height="100%")
+			filter.append(SVG('feColorMatrix', type="hueRotate", values="%d" % filter_value))
+			filter_value = filter_value + 360 / len(chromosomes) 
 			defs.append(filter)
 		return defs
 
@@ -103,6 +106,7 @@ class DNADrawer(object):
 		"""
 		#self.svg_group = SVG('g')
 		shape_count = 0
+		loop_count = 0
 		base_group = SVG('g', id='base_group')
 		chromosome = None
 		while True:
@@ -113,9 +117,10 @@ class DNADrawer(object):
 						break
 			except StopIteration:                                                    
 				break
-			if shape_count < self.offset: 
-				shape_count=shape_count+1
-				continue
+			
+			loop_count=loop_count+1
+			if loop_count < self.offset: continue
+			
 			# create a group for chromosome
 			if chromosome != snp.chromosome:
 				chromo_group = SVG('g', id=snp.chromosome, filter="url(#F%s)" % snp.chromosome)
@@ -125,7 +130,7 @@ class DNADrawer(object):
 			chromo_group.append(svg)
 			self._calculate_new_pos()
 			shape_count=shape_count+1
-			if shape_count==self.limit: break
+			if shape_count==self.count: break
 			if self._current_y==self.grid_height: break
 		return base_group
 
