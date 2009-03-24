@@ -131,7 +131,7 @@ class DNADrawer(object):
 			self._calculate_new_pos()
 			shape_count=shape_count+1
 			if shape_count==self.count: break
-			if self._current_y==self.grid_height: break
+			if self._current_x==self.grid_width: break
 		return base_group
 
 	def svg_shape(self, snp):
@@ -176,15 +176,21 @@ class DNADrawer(object):
 		return self._current_y * self.shape_size
 	
 	def _calculate_new_pos(self):
-		# if not full row
-		if self._current_x == self.grid_width-1:
-			# starting place for next shape
-			self._current_x = 0
-			self._current_y = self._current_y + 1
+		## if not full row
+		#if self._current_x == self.grid_width-1:
+		#	# starting place for next shape
+		#	self._current_x = 0
+		#	self._current_y = self._current_y + 1
+		#else:
+		#	self._current_x = self._current_x + 1	
+		
+		# if not full width
+		if self._current_y == self.grid_height-1:
+			# starting pace for next shape
+			self._current_y = 0
+			self._current_x = self._current_x + 1
 		else:
-			self._current_x = self._current_x + 1	
-			
-			
+			self._current_y = self._current_y + 1
 			
 			
 			
