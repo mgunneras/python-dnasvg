@@ -148,7 +148,7 @@ class DNADrawer(object):
 			colour = snp.colour(index)
 			group.append(SVG("polygon", points=points_string, fill=rgb(colour[0], colour[1], colour[2], 255)))
 		if snp.trait:
-			group.append(SVG("text", SVG("tspan", snp.trait[0]), x=self.x(), y=self.y()-2, fill="black", font_size="10pt"))
+			group.append(SVG("text", SVG("tspan", snp.trait[1]), x=self.x(), y=self.y()-2, fill="white", font_size="10pt"))
 		return group
 	
 	def trigon_points(self, point_left):
